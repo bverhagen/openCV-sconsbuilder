@@ -46,6 +46,7 @@ Configuring SConstruct and SConscript
 - OPENCVBUILDER\_3RDPARTY\_DIR: path to the '3rdparty' dir in the downloaded opencv source file directory after it has been downloaded using 'getOpenCv.sh'
  
 2) Add 'opencvBuilder' to the environment tools
+
 3) Call the SConscript file in the root of this repo.
 
 Check the SConstruct and SConscript files in the examples directory for an example.
@@ -57,11 +58,13 @@ In the example dir you find an example program that is build using the openCV sc
 To build the example:
 1) run getOpenCv.sh:
 	./getOpenCv.sh
+
 2) Go to the example dir and build the project:
 	scons example target=<target>
 		where <target> is (depending on your system):
 			linux (default)
 			macosx
+
 3) Run the example:
 	build/example
 
