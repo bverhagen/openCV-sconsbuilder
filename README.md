@@ -23,12 +23,15 @@ Installation
 ------------
 
 1) Clone the openCV-sconsbuilder:
+
 	git clone git@github.com:bverhagen/openCV-sconsbuilder.git
 
 2) Run getOpenCv.sh:
+
 	./getOpenCv.sh
 
 3) Make a softlink from the site\_tools/site\_tools directory of your scons build system to the opencvBuilder directory:
+
 	ln -s <path to opencvBuilder directory> openCvBuilder
 
 4) Configure your SConstruct and SConscript files as described in the chapter 'Configuring SConstruct and SConscript'
@@ -57,15 +60,21 @@ In the example dir you find an example program that is build using the openCV sc
 
 To build the example:
 1) run getOpenCv.sh:
+
 	./getOpenCv.sh
 
 2) Go to the example dir and build the project:
+
 	scons example target=<target>
+
 		where <target> is (depending on your system):
+
 			linux (default)
+
 			macosx
 
 3) Run the example:
+
 	build/example
 
 You can find an additional example in the 3rdparty directory of the EmbeddedMT project:
