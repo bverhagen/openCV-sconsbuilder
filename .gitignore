@@ -1,3 +1,14 @@
+# Project specific
+build
+include
+lib
+opencv
+
+# Scons tmp files
+*.swo
+*.swp
+*.sconsign.dblite
+
 # Compiled Object files
 *.slo
 *.lo
