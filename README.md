@@ -24,10 +24,13 @@ Installation
 
 1) Clone the openCV-sconsbuilder:
 	git clone git@github.com:bverhagen/openCV-sconsbuilder.git
+
 2) Run getOpenCv.sh:
 	./getOpenCv.sh
+
 3) Make a softlink from the site\_tools/site\_tools directory of your scons build system to the opencvBuilder directory:
 	ln -s <path to opencvBuilder directory> openCvBuilder
+
 4) Configure your SConstruct and SConscript files as described in the chapter 'Configuring SConstruct and SConscript'
 
 Configuring SConstruct and SConscript
