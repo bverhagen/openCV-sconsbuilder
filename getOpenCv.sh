@@ -2,7 +2,7 @@
 buildshLocation=$(dirname $0)
 dir=$(cd $buildshLocation;pwd)
 
-latest_stable_commit='ab2749d648b2792d332028d378cf7334498e517c'
+latest_stable_commit='2d81595ed4ac44dd02779485bdd76ec15edb4ee7'
 current_dir=$(pwd)
 
 cd $dir
