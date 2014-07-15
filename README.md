@@ -15,7 +15,7 @@ This scons builder supports VariantDir builds, but object files of the opencv so
 Requirements
 ------------
 
-- git for downloading compatible openCV source files (alternatively you can do this manually)
+- wget and unzip for downloading and unzipping openCV source files (alternatively you can do this manually
 - scons
 - cmake
 
