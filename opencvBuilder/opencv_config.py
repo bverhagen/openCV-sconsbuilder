@@ -283,7 +283,6 @@ class modulesToFilterFunctions(object):
 	sources = modulesToFilterFunctions.optionToSources('WITH_IOS', sources, '{module}/src/cap_ios_photo_camera.mm'.format(module = modulePath))
 	sources = modulesToFilterFunctions.optionToSources('WITH_IOS', sources, '{module}/src/cap_ios_video_camera.mm'.format(module = modulePath))
 	sources = modulesToFilterFunctions.optionToSources('WITH_QTKIT', sources, '{module}/src/cap_avfoundation.mm'.format(module = modulePath))
-	sources = modulesToFilterFunctions.optionToSources('WITH_IOS', sources, '{module}/src/ios_conversions.mm'.format(module = modulePath))
         # In order to support the following: add reference to their respective libs
         sources = modulesToFilterFunctions.optionToSources('WITH_ANDROID', sources, '{module}/src/cap_android.cpp'.format(module = modulePath))
         sources = modulesToFilterFunctions.optionToSources('WITH_CMU1394', sources, '{module}/src/cap_cmu.cpp'.format(module = modulePath))
@@ -309,6 +308,12 @@ class modulesToFilterFunctions(object):
         additionalLibs = list()
         sources.extend(getFilesInFolder('{module}/src/akaze'.format(module = modulePath), '.c'))
         sources.extend(getFilesInFolder('{module}/src/kaze'.format(module = modulePath), '.c'))
+        return sources,additionalIncludes,additionalLibs
+    @staticmethod
+    def imgcodecs(sources, modulePath):
+        additionalIncludes = list()
+        additionalLibs = list()
+	sources = modulesToFilterFunctions.optionToSources('WITH_IOS', sources, '{module}/src/ios_conversions.mm'.format(module = modulePath))
         return sources,additionalIncludes,additionalLibs
 
 def findGstreamer():
@@ -339,7 +344,8 @@ def findGtk2():
 modulesToFilter = {
         'highgui' : modulesToFilterFunctions.highgui,
         'nonfree' : modulesToFilterFunctions.nonfree,
-        'features2d'    : modulesToFilterFunctions.features2d
+        'features2d'    : modulesToFilterFunctions.features2d,
+        'imgcodecs' : modulesToFilterFunctions.imgcodecs
 }
 
 class getAdditionalLibsFunctions(object):

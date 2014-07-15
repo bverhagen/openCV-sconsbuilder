@@ -2,6 +2,7 @@ Import('env')
 
 libs = [
 	'opencv_highgui',
+	'opencv_imgcodecs',
 	'opencv_imgproc',
 	'opencv_core',
 ]
@@ -19,3 +20,29 @@ libspath.append(env['OPENCVBUILDER_LIBS_DIR'])
 
 target = env.Program('example.cpp', LIBS = libs, LIBPATH = libspath)
 env.Alias("example", target)
+
+libs = [
+	'opencv_flann',
+	'opencv_ml',
+	'opencv_nonfree',
+	'opencv_objdetect',
+	'opencv_photo',
+	'opencv_video',
+	'opencv_features2d',
+	'opencv_highgui',
+	'opencv_imgcodecs',
+	'opencv_imgproc',
+	'opencv_core',
+]
+
+libs.extend(env['OPENCVBUILDER_ADDITIONAL_LIBRARIES'])
+
+# Add default libraries
+libs.extend([
+	'm',
+	'dl',
+	'stdc++'
+])
+
+target = env.Program('exampleAllLibs.cpp', LIBS = libs, LIBPATH = libspath)
+env.Alias("buildAllLibs", target)
