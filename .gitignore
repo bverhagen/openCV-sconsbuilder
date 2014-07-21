@@ -3,6 +3,7 @@ build
 include
 lib
 opencv
+*.pyc
 
 # Scons tmp files
 *.swo

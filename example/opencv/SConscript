@@ -6,8 +6,8 @@ if env['BUILD_TARGET'] == 'linux':
 	'BUILD_JPEG' : True,
 	'BUILD_ZLIB' : True,
 	'ENABLE_SSE' : True,
-        'ENABLE_SSE2' : True,
-        'ENABLE_SSE3' : True,
+    'ENABLE_SSE2' : True,
+    'ENABLE_SSE3' : True,
 	'WITH_FFMPEG' : True,
 	'WITH_GTK' : True,
 	'WITH_JPEG' : True,
@@ -18,13 +18,15 @@ if env['BUILD_TARGET'] == 'linux':
 	'/usr/include',
 	'/usr/lib',
     ]
+    env['OPENCVBUILDER_LIB_PATHS'] = []
+
 elif env['BUILD_TARGET'] == 'macosx':
     env['opencv_config'] = {
 	'BUILD_JPEG' : True,
 	'BUILD_ZLIB' : True,
 	'ENABLE_SSE' : True,
-        'ENABLE_SSE2' : True,
-        'ENABLE_SSE3' : True,
+    'ENABLE_SSE2' : True,
+    'ENABLE_SSE3' : True,
 	'WITH_COCOA' : True,
 	'WITH_FFMPEG' : True,
 	'WITH_JPEG' : True,
@@ -37,6 +39,9 @@ elif env['BUILD_TARGET'] == 'macosx':
 	'/opt/local/include',
 	'/opt/local/lib',
     ]
+    env['OPENCVBUILDER_LIB_PATHS'] = [
+ 	'/opt/local/lib'
+    ]
 else:
     env['opencv_config'] = {
     }
@@ -44,8 +49,6 @@ else:
 	'/usr/include',
 	'/usr/lib',
     ]
-
-env['OPENCVBUILDER_MODULE_DIR'] = '{opencv_dir}/opencv/modules'.format(opencv_dir = env['openCV_DIR'])
-env['OPENCVBUILDER_3RDPARTY_DIR'] = '{opencv_dir}/opencv/3rdparty'.format(opencv_dir = env['openCV_DIR'])
+    env['OPENCVBUILDER_LIB_PATHS'] = []
 
 SConscript('opencv/SConscript')

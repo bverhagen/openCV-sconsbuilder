@@ -1,41 +1,24 @@
 from SCons.Builder import Builder
 import os
-import string
-import shutil
-import thirdparty_config
+
+# This module import
+import opencvBuilderUtils
+import thirdpartyConfig
 import opencv_config
 
-opencv_module_includes = list()
 configDirectory = 'opencv'
 
 def build_opencv_emitter(target, source, env):
     ''' Emitter for openCV builder '''
-    headerExtensions = ['.h'] # This will select .hpp files as well
-    module = os.path.basename(os.path.normpath(env['opencv_module']))
-    target.append('opencv_{module}'.format(module = module))
+    module = os.path.basename(env['opencv_module'].rstr())
+    try:
+        thirdpartySource,thirdpartyTarget = opencv_config.moduleToEmitterValues[module](module)
+    except KeyError:
+        # This means we can call the default action
+        thirdpartySource,thirdpartyTarget = opencv_config.moduleToEmitterValues['default'](module)
 
-    # Add module hpp file
-    source.extend(opencv_config.getFilesInFolder('{module}/include/opencv2'.format(module = env['opencv_module']), headerExtensions))
-    env.Install('{includeDir}/opencv2'.format(includeDir=env['OPENCVBUILDER_INCLUDE_DIR']), source)
-
-    # If core module, add general includes
-    if 'core' in env['opencv_module']:
-        # Add general headers
-        source.extend(opencv_config.getFilesInFolder('{module}/../../include/opencv2'.format(module = env['opencv_module']), headerExtensions))
-        source.extend(opencv_config.getFilesInFolder('{module}/../../include/opencv'.format(module = env['opencv_module']), headerExtensions))
-        for includePath in env['OPENCVBUILDER_INCLUDE_PATHS']:
-	    opencv_module_includes.append(includePath)
-        # Add opencl header files to includes
-        if opencv_config.ccmake['WITH_OPENCL']:
-            opencv_module_includes.append('{module}../../3rdparty/include/opencl/1.2'.format(module = env['opencv_module']))
-
-    # Install header files
-    header_files = list()
-    header_files.extend(opencv_config.getFilesInFolder('{module}/include/opencv2/{module_name}'.format(module = env['opencv_module'], module_name = module), ['.h']))
-    env.Install('{includeDir}/opencv2/{module}'.format(includeDir=env['OPENCVBUILDER_INCLUDE_DIR'], module = module), header_files)
-    
-    # Add module includes to path for other modules that depend on this one
-    opencv_module_includes.append('{module}/include'.format(module = env['opencv_module']))
+    source.extend(thirdpartySource)
+    target.extend(thirdpartyTarget)
 
     # Search additional library dependencies
     try:
@@ -50,12 +33,22 @@ def build_opencv_emitter(target, source, env):
 		env['OPENCVBUILDER_ADDITIONAL_FLAGS'] = addLinkFlags
     except KeyError:
         pass
-
     return target,source
 
 def build_opencv_generator(source, target, env, for_signature):
     ''' Generator for openCV builder '''
-    module = os.path.basename(os.path.normpath(env['opencv_module']))
+    module = os.path.basename(env['opencv_module'].rstr())
+
+    # Install the required header files
+    env.Install('{includeDir}/opencv2'.format(includeDir=env['OPENCVBUILDER_INCLUDE_DIR']), source[0])
+    env.Install('{includeDir}/opencv2/{module}'.format(module = module, includeDir = env['OPENCVBUILDER_INCLUDE_DIR']), source[1])
+    try:
+        additionalHeaders = opencv_config.moduleToAdditionalHeaders[str(module)](module, env)
+    except KeyError:
+        # This means we can call the default handler
+        additionalHeaders = opencv_config.moduleToAdditionalHeaders['default'](module, env)
+
+    env.Install('{includeDir}/opencv2/{module}'.format(module = module, includeDir = env['OPENCVBUILDER_INCLUDE_DIR']), additionalHeaders)
 
     # Configure build environment for opencv
     env_opencv = env.Clone()
@@ -64,7 +57,6 @@ def build_opencv_generator(source, target, env, for_signature):
     defines,options = opencv_config.getDefinesAndCompileOptions()
     env_opencv['CPPDEFINES'].extend(defines)
     env_opencv['CXXFLAGS'].extend(options)
-    env_opencv['CPPPATH'].append(opencv_module_includes)
     env_opencv['CPPPATH'].append('{module}/src'.format(module = env['opencv_module']))
 
     if module == 'core':
@@ -74,14 +66,16 @@ def build_opencv_generator(source, target, env, for_signature):
     
     # Build module
     sources = list()
-    sources.extend(opencv_config.getFilesInFolder('{module}/src'.format(module = env['opencv_module']), ['.c', '.mm']))
+    sources.extend(opencvBuilderUtils.getFilesInFolder(env,'{module}/src'.format(module = env['opencv_module']), ['*.c', '*.cpp', '*.mm']))
     sources.append('{module}/src/opencl_kernels.cpp'.format(module = env['opencv_module']))
     try:
-        sources,additionalIncludes,additionalLibs = opencv_config.modulesToFilter[str(module)](sources, env['opencv_module'])
+        sources,additionalIncludes,additionalLibs = opencv_config.modulesToFilter[str(module)](env, sources, env['opencv_module'])
         env_opencv['CPPPATH'].extend(additionalIncludes)
     except KeyError:
         pass
 
+    env_opencv['CPPPATH'].extend(env['OPENCVBUILDER_INCLUDE_PATHS'])   
+	
     lib = env_opencv.Library('{lib}'.format(lib = target[0]), sources)
     installed_lib = env_opencv.Install("{libs_dir}".format(libs_dir=env['OPENCVBUILDER_LIBS_DIR']), lib)
     return installed_lib
@@ -102,7 +96,7 @@ def config_opencv_emitter(target, source, env):
     # Check if configDirectory exists. If not, we are building in a variantDir and the entire directory structure should be copied
     if not os.path.isdir(configDirectory):
         print('VariantDir detected. Copying directory structure...')
-        copyDirectoryTree('{opencvDir}/{opencv_source}'.format(opencvDir=env['openCV_DIR'], opencv_source = configDirectory), configDirectory)
+        opencvBuilderUtils.copyDirectoryTree('{opencvDir}/{opencv_source}'.format(opencvDir=env['openCV_DIR'], opencv_source = configDirectory), configDirectory)
 
     # Add additional include paths
     opencv_config.opencvBuilderAdditionalIncludePaths = env['OPENCVBUILDER_INCLUDE_PATHS']
@@ -133,44 +127,52 @@ def opencl_opencv_emitter(target, source, env):
 
 def opencl_opencv_generator(source, target, env, for_signature):
     ''' Opencl builder generator '''
-    module = os.path.basename(os.path.normpath(env['opencv_module']))
-    cmd = 'cmake -DMODULE_NAME="{module_name}" -DCL_DIR="{module}/src/opencl" -DOUTPUT=$TARGET -P {module}/../../cmake/cl2cpp.cmake'.format(module = env['opencv_module'], module_name = module)
+    module = os.path.basename(env['opencv_module'].rstr())
+    clmakePath = env.Glob('{path}/../../cmake/cl2cpp.cmake'.format(path = env['opencv_module']))
+    cmd = 'cmake -DMODULE_NAME="{module_name}" -DCL_DIR="{module}/src/opencl" -DOUTPUT=$TARGET -P {cmakeFile}'.format(module = env['opencv_module'], module_name = module, cmakeFile = clmakePath[0].rstr())
     opencl_files = env.Command("{module}/src/opencl_kernels.hpp".format(module = env['opencv_module']),'', cmd)
     opencl_files = env.Command("{module}/src/opencl_kernels.cpp".format(module = env['opencv_module']),'', cmd)
     return opencl_files
 
 def thirdparty_opencv_emitter(target, source, env):
     ''' Emitter for 3rdparty openCV stuff '''
-    headerExtensions = ['.h'] # This will select .hpp files as well
-    module = os.path.basename(os.path.normpath(env['opencv_3rdparty']))
-    target.append('{module}'.format(module = module))
-
-    # Add module hpp file
-    source.extend(opencv_config.getFilesInFolder('{module}'.format(module = env['opencv_3rdparty']), headerExtensions))
-
-    # Install header files
-    header_files = list()
-    header_files.extend(opencv_config.getFilesInFolder('{module}'.format(module = env['opencv_3rdparty']), headerExtensions))
-    env.Install('{includeDir}'.format(includeDir=env['OPENCVBUILDER_INCLUDE_DIR']), header_files)
-    
-    # Add module includes to path for other modules that depend on this one
-    opencv_module_includes.append('{module}'.format(module = env['opencv_3rdparty']))
+    module = os.path.basename(env['opencv_3rdparty'].rstr())
+    try:
+        thirdpartySource,thirdpartyTarget = thirdpartyConfig.thirdpartyToEmitterValues[module]()
+        source.extend(thirdpartySource)
+        target.extend(thirdpartyTarget)
+    except KeyError:
+        # This means the third party lib is not yet supported. Generated unique dummies
+        source.append('{module}_dummy.h'.format(module = module))
+        target.append('{module}_dummy'.format(module = module))
     return target,source
 
 def thirdparty_opencv_generator(source, target, env, for_signature):
     ''' Generator for 3rdparty openCV stuff '''
-    module = os.path.basename(os.path.normpath(env['opencv_3rdparty']))
-
-    # Configure build environment for opencv
+    # Inherit as much as possible from the parent build environment but do not inherit its defines: this will cause the library to be rebuilt in unnecessary cases.
     env_opencv = env.Clone()
-    # Empty defines to avoid unnecessary rebuilding of the library
     env_opencv['CPPDEFINES'] = []
-    env_opencv['CPPPATH'].append(opencv_module_includes)
-    env_opencv['CPPPATH'].append('{module}'.format(module = env['opencv_3rdparty']))
+
+    # Install header file
+    env.Install('{includeDir}/opencv2'.format(includeDir=env['OPENCVBUILDER_INCLUDE_DIR']), source)
+
+    # Do a library specific preliminary step if necessary
+    module = os.path.basename(env['opencv_3rdparty'].rstr())
+    try:
+        thirdpartyConfig.thirdpartyToGeneratorFunctions[module](env_opencv, env['opencv_3rdparty'])
+    except KeyError:
+        pass
 
     # Build module
     sources = list()
-    sources.extend(opencv_config.getFilesInFolder('{module}'.format(module = env['opencv_3rdparty']), ['.c']))
+    sources.extend(opencvBuilderUtils.getFilesInFolder(env,'{module}'.format(module = env['opencv_3rdparty']), ['*.c', '*.cpp']))
+
+    # Filter module-specific files
+    try:
+        sources,additionalIncludes,additionalLibs = thirdpartyConfig.modulesToFilter[str(module)](env, sources, env['opencv_module'])
+        env_opencv['CPPPATH'].extend(additionalIncludes)
+    except KeyError:
+        pass
 
     lib = env_opencv.Library('{lib}'.format(lib = target[0]), sources)
     installed_lib = env_opencv.Install("{libs_dir}".format(libs_dir=env['OPENCVBUILDER_LIBS_DIR']), lib)
@@ -188,13 +190,3 @@ def generate(env):
     env.Append(BUILDERS = {'openclOpencv' : openclOpencvBuilder})
     opencvBuilder = Builder(emitter = build_opencv_emitter, generator = build_opencv_generator)
     env.Append(BUILDERS = {'buildOpencv' : opencvBuilder})
-
-def copyDirectoryTree(src, dst):
-    print('Copying directory structure...')
-    fread = os.popen('find {src} -type d -print'.format(src = src))
-    folders = fread.read()
-    fread.close()
-    fnames = string.split(folders,"\n")
-    startString = len(src)
-    for f in fnames:
-        os.popen('mkdir -p "{dst}/{dir}"'.format(dst = dst, dir = f[startString:]))

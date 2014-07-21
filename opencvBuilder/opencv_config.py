@@ -1,5 +1,7 @@
 import os
 
+import opencvBuilderUtils
+
 class configParameters:
     FALSE = 0;
     TRUE = 1;
@@ -235,15 +237,17 @@ class modulesToFilterFunctions(object):
     @staticmethod
     def removeFromList(sources, valueToRemove):
         try:
-            sources.remove(valueToRemove)
+            for source in sources:
+                if(os.path.basename(source.rstr()) == os.path.basename(valueToRemove)):
+                    sources.remove(source)
         except:
 	    pass
         return sources
     @staticmethod
-    def nothingSpecial(sources, modulePath):
+    def nothingSpecial(env, sources, modulePath):
         return sources,None,None
     @staticmethod
-    def highgui(sources, modulePath):
+    def highgui(env, sources, modulePath):
         additionalIncludes = list()
         additionalLibs = list()
         sources = modulesToFilterFunctions.optionToSources('WITH_XIMEA', sources, '{module}/src/cap_ximea.cpp'.format(module = modulePath))
@@ -297,20 +301,20 @@ class modulesToFilterFunctions(object):
         return sources,additionalIncludes,additionalLibs
 
     @staticmethod
-    def nonfree(sources, modulePath):
+    def nonfree(env, sources, modulePath):
         additionalIncludes = list()
         additionalLibs = list()
         additionalIncludes.append('../../3rdparty/include/opencl/1.2')
         return sources,additionalIncludes,additionalLibs
     @staticmethod
-    def features2d(sources, modulePath):
+    def features2d(env, sources, modulePath):
         additionalIncludes = list()
         additionalLibs = list()
-        sources.extend(getFilesInFolder('{module}/src/akaze'.format(module = modulePath), '.c'))
-        sources.extend(getFilesInFolder('{module}/src/kaze'.format(module = modulePath), '.c'))
+        sources.extend(opencvBuilderUtils.getFilesInFolder(env,'{module}/src/akaze'.format(module = modulePath), '*.c'))
+        sources.extend(opencvBuilderUtils.getFilesInFolder(env,'{module}/src/kaze'.format(module = modulePath), '*.c'))
         return sources,additionalIncludes,additionalLibs
     @staticmethod
-    def imgcodecs(sources, modulePath):
+    def imgcodecs(env, sources, modulePath):
         additionalIncludes = list()
         additionalLibs = list()
 	sources = modulesToFilterFunctions.optionToSources('WITH_IOS', sources, '{module}/src/ios_conversions.mm'.format(module = modulePath))
@@ -432,13 +436,44 @@ def getDefinesAndCompileOptions():
 
 configFile = 'cvconfig.h'
 
-def getFilesInFolder(folder, headerExtensions = ['.h']):
-    headers = list()
-    try:
-        content = os.listdir('{folder}'.format(folder = folder))
-        for ext in headerExtensions:
-            header_content = ['{folder}/{file}'.format(folder = folder, file = header_file) for header_file in content if ext in header_file]
-            headers.extend(header_content)
-    except OSError:
-        pass
-    return headers
+class moduleToEmitterValuesFunctions:
+    @staticmethod
+    def getDefaultIncludePath(module, filename):
+        defaultPath = 'opencv/modules/{module}/include/opencv2'.format(module = module)
+        return ['{path}/{filename}'.format(path = defaultPath, filename = filename), '{path}/{module}/{filename}'.format(module = module, filename = filename, path = defaultPath)]
+    @staticmethod
+    def defaultAction(moduleName):
+        sourceList = moduleToEmitterValuesFunctions.getDefaultIncludePath(moduleName, '{module}.hpp'.format(module = moduleName))
+        targetList = ['opencv_{module}'.format(module = moduleName)]
+        return sourceList,targetList
+
+moduleToEmitterValues = {
+    'default' : moduleToEmitterValuesFunctions.defaultAction
+}
+
+class moduleToAdditionalHeadersFunctions:
+    @staticmethod
+    def getDefaultIncludePath(module, filename = ''):
+        defaultPath = 'opencv/modules/{module}/include/opencv2/{module}'.format(module = module)
+        return '{path}/{filename}'.format(path = defaultPath, filename = filename)
+    @staticmethod
+    def defaultAdditionalHeaderFunctions(moduleName, env):
+        defaultPath = moduleToAdditionalHeadersFunctions.getDefaultIncludePath(moduleName)
+        return opencvBuilderUtils.getFilesInFolder(env,defaultPath,opencvBuilderUtils.headerExtensions)
+    @staticmethod
+    def core(moduleName, env):
+        # Collect the default headers
+        defaultHeaders = moduleToAdditionalHeadersFunctions.defaultAdditionalHeaderFunctions(moduleName, env)
+
+        # Add opencl ones
+        defaultPath = moduleToAdditionalHeadersFunctions.getDefaultIncludePath(moduleName)
+        openclFolderHeaders = (opencvBuilderUtils.getFilesInFolder(env, '{defaultPath}/opencl'.format(defaultPath = defaultPath), opencvBuilderUtils.headerExtensions))
+        env.Install('{includeDir}/opencv2/{module}/opencl'.format(module = moduleName, includeDir = env['OPENCVBUILDER_INCLUDE_DIR']), openclFolderHeaders)
+        openclRuntimeHeaders = (opencvBuilderUtils.getFilesInFolder(env, '{defaultPath}/opencl/runtime'.format(defaultPath = defaultPath), opencvBuilderUtils.headerExtensions))
+        env.Install('{includeDir}/opencv2/{module}/opencl/runtime'.format(module = moduleName, includeDir = env['OPENCVBUILDER_INCLUDE_DIR']), openclRuntimeHeaders)
+        return defaultHeaders
+
+moduleToAdditionalHeaders = {
+        'default' : moduleToAdditionalHeadersFunctions.defaultAdditionalHeaderFunctions,
+        'core' : moduleToAdditionalHeadersFunctions.core
+}

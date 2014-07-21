@@ -45,6 +45,7 @@ Configuring SConstruct and SConscript
 - OPENCVBUILDER\_LIBS\_DIR: path to the folder where all opencv libraries should be placed for your application to find them.
 - opencv\_config: Dictionary of openCV build options that should be set. Default all boolean options are set to False. Check example/opencv/Sconscript for an example. Check site\_scons/site\_tools/openCVBuilder/opencv\_config.py for the entire list of options.
 - OPENCVBUILDER\_INCLUDE\_PATHS: list of directories that contain include files and libraries that are not within your path. Usefull for cross-compilation. If all include files and libraries are within your file, define an empty list for this variable.
+- OPENCVBUILDER\_LIB\_PATHS: list of directories that contain library files and libraries that are not within hour path. You should add this to the libraries you link your application with.
 - OPENCVBUILDER\_MODULE\_DIR: path to the 'modules' dir in the downloaded opencv source file directory after it has been downloaded using 'getOpenCv.sh'.
 - OPENCVBUILDER\_3RDPARTY\_DIR: path to the '3rdparty' dir in the downloaded opencv source file directory after it has been downloaded using 'getOpenCv.sh'
  

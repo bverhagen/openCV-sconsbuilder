@@ -1,3 +1,5 @@
+import os
+
 opts = Variables()
 
 opts.Add(EnumVariable('target', 'Set target', 'linux',
@@ -13,15 +15,15 @@ tools_list = [
 ]
 
 # Init and export build environment
-env = Environment(variables = opts, tools = tools_list)
+env = Environment(variables = opts, tools = tools_list, ENV = {'PATH' : os.environ['PATH']})
 Export('env')
 
 env['BUILD_TARGET'] = env['target']
 
 # Opencv builder settings
-env['openCV_DIR'] = Dir('opencv/opencv').abspath
-env['OPENCVBUILDER_INCLUDE_DIR'] = Dir('include').abspath
-env['OPENCVBUILDER_LIBS_DIR'] = Dir('lib').abspath
+env['openCV_DIR'] = Dir('#opencv/opencv').abspath
+env['OPENCVBUILDER_INCLUDE_DIR'] = Dir('#include').abspath
+env['OPENCVBUILDER_LIBS_DIR'] = Dir('#lib').abspath
 
 # Compilation settings
 env['CPPFLAGS'] = []
@@ -32,8 +34,8 @@ env['CPPPATH'].append(env['OPENCVBUILDER_INCLUDE_DIR'])
 # Define a variant dir
 buildDir = 'build'
 opencvBuildDir = '{buildDir}/build_opencv'.format(buildDir = buildDir)
-VariantDir(buildDir, '.')
-VariantDir(opencvBuildDir, 'opencv')
+VariantDir(buildDir, '.', duplicate=0)
+VariantDir(opencvBuildDir, 'opencv', duplicate=0)
 
 # Define SConscript files
 SConscript_files = [

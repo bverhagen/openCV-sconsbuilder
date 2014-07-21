@@ -17,6 +17,7 @@ libs.extend([
 
 libspath = []
 libspath.append(env['OPENCVBUILDER_LIBS_DIR'])
+libspath.extend(env['OPENCVBUILDER_LIB_PATHS'])
 
 target = env.Program('example.cpp', LIBS = libs, LIBPATH = libspath)
 env.Alias("example", target)
