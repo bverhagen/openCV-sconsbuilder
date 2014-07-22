@@ -46,4 +46,4 @@ libs.extend([
 ])
 
 target = env.Program('exampleAllLibs.cpp', LIBS = libs, LIBPATH = libspath)
-env.Alias("buildAllLibs", target)
+env.Alias("buildAllLibsWithExample", target)
