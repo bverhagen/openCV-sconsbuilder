@@ -2,6 +2,7 @@ Import('env')
 
 libs = [
 	'opencv_highgui',
+	'opencv_videoio',
 	'opencv_imgcodecs',
 	'opencv_imgproc',
 	'opencv_core',
@@ -25,10 +26,11 @@ env.Alias("example", target)
 libs = [
 	'opencv_flann',
 	'opencv_ml',
-	'opencv_nonfree',
+#	'opencv_nonfree',
 	'opencv_objdetect',
 	'opencv_photo',
 	'opencv_video',
+	'opencv_videoio',
 	'opencv_features2d',
 	'opencv_highgui',
 	'opencv_imgcodecs',

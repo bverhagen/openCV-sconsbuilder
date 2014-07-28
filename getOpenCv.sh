@@ -5,8 +5,7 @@ dir=$(cd $buildshLocation;pwd)
 wgetbin='wget'
 unzipbin='unzip'
 opencv_repo='Itseez/opencv'
-opencv_latest_stable_commit='2d81595ed4ac44dd02779485bdd76ec15edb4ee7'
-opencv_latest_stable_commit='dbefbbc52227d3ed5fffe0188a0221c1ade2618c'
+opencv_latest_stable_commit='a587759d760ef65b2c210fd9e5775f67a1ba31aa'
 
 function downloadFromGithub {
 	$wgetbin http://github.com/$1/archive/$2.zip

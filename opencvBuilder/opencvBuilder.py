@@ -124,13 +124,19 @@ def generateConfigFile(configFile, config = {}):
 def opencl_opencv_emitter(target, source, env):
     ''' Opencl builder emitter '''
     source.append('{module}/src/opencl_kernels.hpp'.format(module = env['opencv_module']))
+    source.append('{module}/src/opencl_kernels.cpp'.format(module = env['opencv_module']))
     return target, source
 
 def opencl_opencv_generator(source, target, env, for_signature):
     ''' Opencl builder generator '''
     module = os.path.basename(env['opencv_module'].rstr())
     clmakePath = env.Glob('{path}/../../cmake/cl2cpp.cmake'.format(path = env['opencv_module']))
-    cmd = 'cmake -DMODULE_NAME="{module_name}" -DCL_DIR="{module}/src/opencl" -DOUTPUT=$TARGET -P {cmakeFile}'.format(module = env['opencv_module'], module_name = module, cmakeFile = clmakePath[0].rstr())
+    clfiles = env.Glob('{path}/src/opencl/*.cl'.format(path = env['opencv_module']))
+    if clfiles:
+        cldir =  os.path.dirname(os.path.realpath(clfiles[0].rstr()))
+    else:
+        cldir = ''
+    cmd = 'cmake -DMODULE_NAME="{module_name}" -DCL_DIR="{cldir}" -DOUTPUT=$TARGET -P {cmakeFile}'.format(module = env['opencv_module'], module_name = module, cmakeFile = clmakePath[0].rstr(), cldir = cldir)
     opencl_files = env.Command("{module}/src/opencl_kernels.hpp".format(module = env['opencv_module']),'', cmd)
     opencl_files = env.Command("{module}/src/opencl_kernels.cpp".format(module = env['opencv_module']),'', cmd)
     return opencl_files

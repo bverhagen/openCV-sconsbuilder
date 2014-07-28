@@ -299,6 +299,52 @@ class modulesToFilterFunctions(object):
         sources = modulesToFilterFunctions.optionToSources('WITH_OPENNI', sources, '{module}/src/cap_openni.cpp'.format(module = modulePath))
         sources = modulesToFilterFunctions.optionToSources('WITH_PVAPI', sources, '{module}/src/cap_pvapi.cpp'.format(module = modulePath))
         return sources,additionalIncludes,additionalLibs
+    @staticmethod
+    def videoio(env, sources, modulePath):
+        additionalIncludes = list()
+        additionalLibs = list()
+        sources = modulesToFilterFunctions.optionToSources('WITH_XIMEA', sources, '{module}/src/cap_ximea.cpp'.format(module = modulePath))
+        # TODO: Add ximea 32-bit lib if needed 
+        additionalLibs.append('m3apiX64')
+	sources = modulesToFilterFunctions.optionToSources('WITH_XINE', sources, '{module}/src/cap_xine.cpp'.format(module = modulePath))
+	sources = modulesToFilterFunctions.optionToSources('WITH_1394-V1', sources, '{module}/src/cap_dc1394.cpp'.format(module = modulePath))
+	sources = modulesToFilterFunctions.optionToSources('WITH_1394-V2', sources, '{module}/src/cap_dc1394_v2.cpp'.format(module = modulePath))
+        sources = modulesToFilterFunctions.optionToSources('WITH_GIGEAPI', sources, '{module}/src/cap_giganetix.cpp'.format(module = modulePath))
+        sources = modulesToFilterFunctions.optionToSources('WITH_VFW', sources, '{module}/src/cap_vfw.cpp'.format(module = modulePath))
+            
+        sources = modulesToFilterFunctions.optionToSources('WITH_UNICAP', sources, '{module}/src/cap_unicap.cpp'.format(module = modulePath))
+        sources = modulesToFilterFunctions.optionToSources('WITH_QT', sources, '{module}/src/cap_qt.cpp'.format(module = modulePath))
+        sources = modulesToFilterFunctions.optionToSources('WITH_QTKIT', sources, '{module}/src/cap_qtkit.mm'.format(module = modulePath))
+	sources = modulesToFilterFunctions.optionToSources('WITH_LIBV4L', sources, '{module}/src/cap_libv4l.cpp'.format(module = modulePath))
+        sources = modulesToFilterFunctions.optionToSources('WITH_V4L', sources, '{module}/src/cap_v4l.cpp'.format(module = modulePath))
+        sources = modulesToFilterFunctions.optionToSources('WITH_TYZX', sources, '{module}/src/cap_tyzx.cpp'.format(module = modulePath))
+        sources = modulesToFilterFunctions.optionToSources('WITH_MIL', sources, '{module}/src/cap_mil.cpp'.format(module = modulePath))
+	sources = modulesToFilterFunctions.optionToSources('WITH_IOS', sources, '{module}/src/cap_ios_abstract_camera.mm'.format(module = modulePath))
+	sources = modulesToFilterFunctions.optionToSources('WITH_IOS', sources, '{module}/src/cap_ios_photo_camera.mm'.format(module = modulePath))
+	sources = modulesToFilterFunctions.optionToSources('WITH_IOS', sources, '{module}/src/cap_ios_video_camera.mm'.format(module = modulePath))
+	sources = modulesToFilterFunctions.optionToSources('WITH_QTKIT', sources, '{module}/src/cap_avfoundation.mm'.format(module = modulePath))
+        # In order to support the following: add reference to their respective libs
+        sources = modulesToFilterFunctions.optionToSources('WITH_ANDROID', sources, '{module}/src/cap_android.cpp'.format(module = modulePath))
+        sources = modulesToFilterFunctions.optionToSources('WITH_CMU1394', sources, '{module}/src/cap_cmu.cpp'.format(module = modulePath))
+        sources = modulesToFilterFunctions.optionToSources('WITH_DSHOW', sources, '{module}/src/cap_dshow.cpp'.format(module = modulePath))
+        sources = modulesToFilterFunctions.optionToSources('WITH_FFMPEG', sources, '{module}/src/cap_ffmpeg_api.cpp'.format(module = modulePath))
+        sources = modulesToFilterFunctions.optionToSources('WITH_FFMPEG', sources, '{module}/src/cap_ffmpeg.cpp'.format(module = modulePath))
+        sources = modulesToFilterFunctions.optionToSources('WITH_FFMPEG', sources, '{module}/src/cap_ffmpeg_impl.cpp'.format(module = modulePath))
+        sources = modulesToFilterFunctions.optionToSources('WITH_INTELPERC', sources, '{module}/src/cap_intelperc.cpp'.format(module = modulePath))
+        sources = modulesToFilterFunctions.optionToSources('WITH_MSMF', sources, '{module}/src/cap_msmf.cpp'.format(module = modulePath))
+        sources = modulesToFilterFunctions.optionToSources('WITH_OPENNI', sources, '{module}/src/cap_openni.cpp'.format(module = modulePath))
+        sources = modulesToFilterFunctions.optionToSources('WITH_PVAPI', sources, '{module}/src/cap_pvapi.cpp'.format(module = modulePath))
+        if not ccmake['WITH_GSTREAMER'] and not ccmake['WITH_GSTREAMER_0_10']:
+            sources = modulesToFilterFunctions.optionToSources('WITH_GSTREAMER', sources, '{module}/src/cap_gstreamer.cpp'.format(module = modulePath))
+        else:
+            if ccmake['WITH_GSTREAMER']:
+                additionalIncludes.extend(findGstreamer())
+            else:
+                additionalIncludes.extend(findGstreamer010())
+	    for includePath in opencvBuilderAdditionalIncludePaths:
+            	additionalIncludes.append('{path}/glib-2.0'.format(path=includePath))
+            	additionalIncludes.append('{path}/glib-2.0/include'.format(path=includePath))
+        return sources,additionalIncludes,additionalLibs
 
     @staticmethod
     def nonfree(env, sources, modulePath):
@@ -349,7 +395,8 @@ modulesToFilter = {
         'highgui' : modulesToFilterFunctions.highgui,
         'nonfree' : modulesToFilterFunctions.nonfree,
         'features2d'    : modulesToFilterFunctions.features2d,
-        'imgcodecs' : modulesToFilterFunctions.imgcodecs
+        'imgcodecs' : modulesToFilterFunctions.imgcodecs,
+        'videoio'   : modulesToFilterFunctions.videoio
 }
 
 class getAdditionalLibsFunctions(object):
