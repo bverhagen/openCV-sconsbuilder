@@ -132,7 +132,6 @@ def opencl_opencv_generator(source, target, env, for_signature):
     module = os.path.basename(env['opencv_module'].rstr())
     clmakePath = env.Glob('{path}/../../cmake/cl2cpp.cmake'.format(path = env['opencv_module']))
     clmakePath = clmakePath[0].srcnode()
-    print clmakePath
     clfiles = env.Glob('{path}/src/opencl/*.cl'.format(path = env['opencv_module']))
     if clfiles:
         cldir =  os.path.dirname(os.path.realpath(clfiles[0].srcnode().rstr()))
