@@ -52,3 +52,23 @@ class modulesToFilterFunctions:
 
 modulesToFilter = {
 }
+
+class moduleDefines:
+    @staticmethod
+    def all():
+        return ['-DNDEBUG']
+
+getDefines = {
+    'libjpeg' : moduleDefines.all,
+    'zlib' : moduleDefines.all
+}
+
+class moduleCompileFlags:
+    @staticmethod
+    def all():
+        return ['-fPIC']
+
+getCompileFlags = {
+    'libjpeg' : moduleCompileFlags.all,
+    'zlib' : moduleCompileFlags.all
+}

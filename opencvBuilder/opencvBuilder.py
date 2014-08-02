@@ -157,15 +157,24 @@ def thirdparty_opencv_emitter(target, source, env):
 
 def thirdparty_opencv_generator(source, target, env, for_signature):
     ''' Generator for 3rdparty openCV stuff '''
+    # Do a library specific preliminary step if necessary
+    module = os.path.basename(env['opencv_3rdparty'].rstr())
+
     # Inherit as much as possible from the parent build environment but do not inherit its defines: this will cause the library to be rebuilt in unnecessary cases.
     env_opencv = env.Clone()
     env_opencv['CPPDEFINES'] = []
+    try:
+        env_opencv['CPPDEFINES'].extend(thirdpartyConfig.getDefines[module]())
+    except KeyError:
+        pass
+    try:
+        env_opencv['CPPFLAGS'].extend(thirdpartyConfig.getCompileFlags[module]())
+    except KeyError:
+        pass
 
     # Install header file
     env.Install('{includeDir}/opencv2'.format(includeDir=env['OPENCVBUILDER_INCLUDE_DIR']), source)
 
-    # Do a library specific preliminary step if necessary
-    module = os.path.basename(env['opencv_3rdparty'].rstr())
     try:
         thirdpartyConfig.thirdpartyToGeneratorFunctions[module](env_opencv, env['opencv_3rdparty'])
     except KeyError:
