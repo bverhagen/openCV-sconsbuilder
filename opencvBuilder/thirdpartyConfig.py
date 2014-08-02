@@ -1,6 +1,7 @@
 import os
 
 import opencvBuilderUtils
+import opencv_config
 
 class thirdpartyEmitterFunctions:
     @staticmethod
@@ -56,7 +57,8 @@ modulesToFilter = {
 class moduleDefines:
     @staticmethod
     def all():
-        return ['-DNDEBUG']
+        defines,options = opencv_config.getDefinesAndCompileOptions()
+        return defines
 
 getDefines = {
     'libjpeg' : moduleDefines.all,
@@ -66,7 +68,8 @@ getDefines = {
 class moduleCompileFlags:
     @staticmethod
     def all():
-        return ['-fPIC']
+        defines,options = opencv_config.getDefinesAndCompileOptions()
+        return options
 
 getCompileFlags = {
     'libjpeg' : moduleCompileFlags.all,

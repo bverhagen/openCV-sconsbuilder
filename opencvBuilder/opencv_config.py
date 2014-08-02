@@ -23,9 +23,9 @@ ccmake = {
 
         # Enable stuff
         'ENABLE_AVX' : False,
-        'ENABLE_COVERAGE' : configParameters.INHERIT,
+        'ENABLE_COVERAGE' : False,
         'ENABLE_FAST_MATH' : False,
-        'ENABLE_OMIT_POINTER_FRAME' : False,
+        'ENABLE_OMIT_POINTER_FRAME' : False,     # Supported
         'ENABLE_PRECOMPILED_HEADER' : False,
         'ENABLE_PROFILING' : False,
         'ENABLE_SOLUTION_FOLDERS' : False,
@@ -479,6 +479,8 @@ def getDefinesAndCompileOptions():
         options.append('-msse3')
     if not ccmake['BUILD_WITH_DEBUG_INFO']:
         defines.append('NDEBUG')
+    if ccmake['ENABLE_OMIT_POINTER_FRAME']:
+        options.append('-fomit-frame-pointer')
     return defines,options
 
 configFile = 'cvconfig.h'
