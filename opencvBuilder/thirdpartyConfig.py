@@ -49,9 +49,20 @@ thirdpartyToGeneratorFunctions = {
 }
 
 class modulesToFilterFunctions:
-    pass
+    @staticmethod
+    def optionToSources(option, sources,falseSource):
+        if not ccmake[option]:
+            sources = modulesToFilterFunctions.removeFromList(sources, source)
+        return sources,None,None
+    @staticmethod
+    def libjpeg(env, sources, modulePath):
+        sources = modulesToFilterFunctions.optionToSources('WITH_IOS', sources, 'jmemansi.c')
+        if ccmake['WITH_IOS']:
+            sources = modulesToFilterFunctions.removeFromList(sources, 'jmemnobs.c')
+        return sources
 
 modulesToFilter = {
+    'libjpeg' : modulesToFilterFunctions.libjpeg
 }
 
 class moduleDefines:
