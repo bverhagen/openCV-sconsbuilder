@@ -138,8 +138,12 @@ def opencl_opencv_generator(source, target, env, for_signature):
     else:
         cldir = ''
     cmd = 'cmake -DMODULE_NAME="{module_name}" -DCL_DIR="{cldir}" -DOUTPUT=$TARGET -P {cmakeFile}'.format(module = env['opencv_module'], module_name = module, cmakeFile = clmakePath, cldir = cldir)
+    # These two are for older versions of the builder
     opencl_files = env.Command("{module}/src/opencl_kernels.hpp".format(module = env['opencv_module']),'', cmd)
-    opencl_files = env.Command("{module}/src/opencl_kernels.cpp".format(module = env['opencv_module']),'', cmd)
+    opencl_files.append(env.Command("{module}/src/opencl_kernels.cpp".format(module = env['opencv_module']),'', cmd))
+    # Do the same for the new opencl_kernels names
+    opencl_files.append(env.Command("{modulePath}/src/opencl_kernels_{module}.hpp".format(modulePath = env['opencv_module'], module = module),'', cmd))
+    opencl_files.append(env.Command("{modulePath}/src/opencl_kernels_{module}.cpp".format(modulePath = env['opencv_module'], module = module),'', cmd))
     return opencl_files
 
 def thirdparty_opencv_emitter(target, source, env):
