@@ -59,7 +59,7 @@ class modulesToFilterFunctions:
         sources = modulesToFilterFunctions.optionToSources('WITH_IOS', sources, 'jmemansi.c')
         if ccmake['WITH_IOS']:
             sources = modulesToFilterFunctions.removeFromList(sources, 'jmemnobs.c')
-        return sources
+        return sources,None,None
 
 modulesToFilter = {
     'libjpeg' : modulesToFilterFunctions.libjpeg
