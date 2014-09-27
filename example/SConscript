@@ -26,7 +26,6 @@ env.Alias("example", target)
 libs = [
 	'opencv_flann',
 	'opencv_ml',
-#	'opencv_nonfree',
 	'opencv_objdetect',
 	'opencv_photo',
 	'opencv_video',
