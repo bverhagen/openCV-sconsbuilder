@@ -54,6 +54,7 @@ ccmake = {
         'WITH_GSTREAMER' : False,	# Supported
         'WITH_GSTREAMER_0_10' : False,	# Supported
         'WITH_GTK' : False,		# Supported
+        'WITH_GTK_2_X' : False,
 	'WITH_IOS' : False,
         'WITH_INTELPERC' : False,
         'WITH_IPP' : False,
@@ -79,7 +80,7 @@ ccmake = {
         'WITH_TIFF' : False,
         'WITH_TYZX' : False,
         'WITH_UNICAP' : False,
-        'WITH_V4L' : False,		# Supported, but same as WITH_LIBV4L. Consider giving it the same value
+        'WITH_V4L' : False,		# Supported
         'WITH_VFW' : False,
         'WITH_VTK' : False,
         'WITH_WIN32UI' : False,
@@ -133,9 +134,23 @@ class configFileGenerator(object):
         defines = defines + configFileGenerator.defUndef(value, 'HAVE_CAMV4L2')
         return defines
     @staticmethod
+    def withV4L(value):
+        defines = configFileGenerator.withLibv4l(value)
+#        defines = defines + configFileGenerator.defUndef(value, 'HAVE_VIDEOIO')
+        return defines
+    @staticmethod
+    def withGtkGeneral(value):
+        return configFileGenerator.defUndef(value, 'HAVE_GTHREAD')
+    @staticmethod
     def withGtk(value):
-        defines = configFileGenerator.defUndef(value, 'HAVE_GTHREAD')
+        defines = configFileGenerator.withGtkGeneral(value)
         defines = defines + configFileGenerator.defUndef(value, 'HAVE_GTK')
+        defines = defines + configFileGenerator.defUndef(value, 'HAVE_GTK3')
+        return defines
+    @staticmethod
+    def withGtk2(value):
+        defines = configFileGenerator.withGtkGeneral(value)
+        defines = defines + configFileGenerator.defUndef(value, 'HAVE_GTK_2_X')
         return defines
     @staticmethod
     def withQtkit(value):
@@ -194,6 +209,7 @@ ccmakeToCvconfig = {
         'WITH_GSTREAMER' : configFileGenerator.withGstreamer,
         'WITH_GSTREAMER_0_10' : configFileGenerator.notDefined,
         'WITH_GTK' : configFileGenerator.withGtk,
+        'WITH_GTK_2_X' : configFileGenerator.withGtk2,
 	'WITH_IOS' : configFileGenerator.notDefined,
         'WITH_INTELPERC' : configFileGenerator.notDefined,
         'WITH_IPP' : configFileGenerator.notDefined,
@@ -219,7 +235,7 @@ ccmakeToCvconfig = {
         'WITH_TIFF' : configFileGenerator.notDefined,
         'WITH_TYZX' : configFileGenerator.notDefined,
         'WITH_UNICAP' : configFileGenerator.notDefined,
-        'WITH_V4L' : configFileGenerator.notDefined,
+        'WITH_V4L' : configFileGenerator.withV4L,
         'WITH_VFW' : configFileGenerator.notDefined,
         'WITH_VTK' :  configFileGenerator.notDefined,
         'WITH_WIN32UI' : configFileGenerator.notDefined,
@@ -268,13 +284,19 @@ class modulesToFilterFunctions(object):
 	    for includePath in opencvBuilderAdditionalIncludePaths:
             	additionalIncludes.append('{path}/glib-2.0'.format(path=includePath))
             	additionalIncludes.append('{path}/glib-2.0/include'.format(path=includePath))
+
+        # Handle GTK
         if ccmake['WITH_GTK']:
+            additionalIncludes.extend(findGtk3())
+        if ccmake['WITH_GTK_2_X']:
             additionalIncludes.extend(findGtk2())
-            
+
+        if not ccmake['WITH_GTK'] and not ccmake['WITH_GTK_2_X']:
+            sources = modulesToFilterFunctions.removeFromList(sources, '{module}/src/window_gtk.cpp'.format(module = modulePath))
+
         sources = modulesToFilterFunctions.optionToSources('WITH_CARBON', sources, '{module}/src/window_carbon.cpp'.format(module = modulePath))
         sources = modulesToFilterFunctions.optionToSources('WITH_WIN32UI', sources, '{module}/src/window_w32.cpp'.format(module = modulePath))
 	sources = modulesToFilterFunctions.optionToSources('WITH_COCOA', sources, '{module}/src/window_cocoa.mm'.format(module = modulePath))
-	sources = modulesToFilterFunctions.optionToSources('WITH_GTK', sources, '{module}/src/window_gtk.cpp'.format(module = modulePath))
         sources = modulesToFilterFunctions.optionToSources('WITH_QT', sources, '{module}/src/window_QT.cpp'.format(module = modulePath))
         sources = modulesToFilterFunctions.optionToSources('WITH_UNICAP', sources, '{module}/src/cap_unicap.cpp'.format(module = modulePath))
         sources = modulesToFilterFunctions.optionToSources('WITH_QT', sources, '{module}/src/cap_qt.cpp'.format(module = modulePath))
@@ -291,6 +313,7 @@ class modulesToFilterFunctions(object):
         sources = modulesToFilterFunctions.optionToSources('WITH_ANDROID', sources, '{module}/src/cap_android.cpp'.format(module = modulePath))
         sources = modulesToFilterFunctions.optionToSources('WITH_CMU1394', sources, '{module}/src/cap_cmu.cpp'.format(module = modulePath))
         sources = modulesToFilterFunctions.optionToSources('WITH_DSHOW', sources, '{module}/src/cap_dshow.cpp'.format(module = modulePath))
+        sources = modulesToFilterFunctions.optionToSources('WITH_FFMPEG', sources, '{module}/src/cap_ffmpeg.cpp'.format(module = modulePath))
         sources = modulesToFilterFunctions.optionToSources('WITH_FFMPEG', sources, '{module}/src/cap_ffmpeg_api.cpp'.format(module = modulePath))
         sources = modulesToFilterFunctions.optionToSources('WITH_FFMPEG', sources, '{module}/src/cap_ffmpeg.cpp'.format(module = modulePath))
         sources = modulesToFilterFunctions.optionToSources('WITH_FFMPEG', sources, '{module}/src/cap_ffmpeg_impl.cpp'.format(module = modulePath))
@@ -378,17 +401,30 @@ def findGstreamer010():
 	paths.append('{path}/gstreamer-0.10'.format(path=includePath))
     return paths
 
-def findGtk2():
+def findGtkGeneral():
     paths = []
     for includePath in opencvBuilderAdditionalIncludePaths:
-	paths.append('{path}/gtk-2.0'.format(path=includePath))
-	paths.append('{path}/gtk-2.0/include'.format(path=includePath))
 	paths.append('{path}/cairo'.format(path=includePath))
 	paths.append('{path}/pango-1.0'.format(path=includePath))
 	paths.append('{path}/gdk-pixbuf-2.0'.format(path=includePath))
 	paths.append('{path}/atk-1.0'.format(path=includePath))
         paths.append('{path}/glib-2.0'.format(path=includePath))
         paths.append('{path}/glib-2.0/include'.format(path=includePath))
+    return paths
+
+def findGtk2():
+    paths = []
+    for includePath in opencvBuilderAdditionalIncludePaths:
+	paths.append('{path}/gtk-2.0'.format(path=includePath))
+	paths.append('{path}/gtk-2.0/include'.format(path=includePath))
+    paths.extend(findGtkGeneral())
+    return paths
+
+def findGtk3():
+    paths = []
+    for includePath in opencvBuilderAdditionalIncludePaths:
+	paths.append('{path}/gtk-3.0'.format(path=includePath))
+    paths.extend(findGtkGeneral())
     return paths
 
 modulesToFilter = {
@@ -418,10 +454,21 @@ class getAdditionalLibsFunctions(object):
         libs = []
 	frameworks = []
         frameworks.append('-pthread')
-        if ccmake['WITH_GTK']:
+        if ccmake['WITH_GTK_2_X']:
             libs.extend([
 		'gtk-x11-2.0',
 		'gdk-x11-2.0',
+                ])
+
+        if ccmake['WITH_GTK']:
+            libs.extend([
+                'gtkmm-3.0',
+                'gtk-3',
+                'gdkmm-3.0',
+                'gdk-3',
+                ])
+        if ccmake['WITH_GTK_2_X'] or ccmake['WITH_GTK']:
+            libs.extend([
 		'cairo',
 		'gdk_pixbuf-2.0',
 		'gobject-2.0',
@@ -481,6 +528,8 @@ def getDefinesAndCompileOptions():
         defines.append('NDEBUG')
     if ccmake['ENABLE_OMIT_POINTER_FRAME']:
         options.append('-fomit-frame-pointer')
+    if ccmake['WITH_GTK']:
+        defines.append('GTK_MAJOR_VERSION=3')
     return defines,options
 
 configFile = 'cvconfig.h'
