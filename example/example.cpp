@@ -12,17 +12,34 @@
  *
  * =====================================================================================
  */
+#include <string>
+#include <iostream>
 #include "opencv2/core/core.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
 int main(int argc, char** argv) {
-	const unsigned int videoId = 0U;
+	std::string filename = "/home/cv/workspace/openCV-sconsbuilder/fixJpegLib/example/duomo.jpg";
+	cv::Mat imFrame = cv::imread(filename, cv::IMREAD_GRAYSCALE);
+
+	if(imFrame.rows == 0 || imFrame.cols == 0) {
+		std::cerr << "Could not load image '" << filename << "'. Exiting now." << std::endl;
+		return EXIT_FAILURE;
+	}
+
+	std::cout << "[" << imFrame.cols << " ," << imFrame.rows << "]" << std::endl;
+
+	cv::imwrite("testImage.jpg", imFrame);
+	cv::imshow("You need vision", imFrame);
+	cv::waitKey(1000);
+
+  	const unsigned int videoId = 0U;
 	cv::VideoCapture videoCapture;
 	videoCapture.open(videoId);
 	if(! videoCapture.isOpened()) {
 		return EXIT_FAILURE;
 	}
-	while(true) {
+	const uint NB_OF_FRAMES_TO_CAPTURE = 90;
+	for(uint i = 0; i < NB_OF_FRAMES_TO_CAPTURE; ++i) {
 		cv::Mat frame;
 		videoCapture.read(frame);
 		cv::imshow("Camera input", frame);

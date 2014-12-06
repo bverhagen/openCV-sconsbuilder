@@ -28,7 +28,8 @@ env['OPENCVBUILDER_LIBS_DIR'] = Dir('#lib').abspath
 # Compilation settings
 env['CPPFLAGS'] = []
 env['CPPPATH'] = []
-env['CPPFLAGS'].append('-Ofast')
+env['CPPFLAGS'].append('-O3')
+#env['CPPFLAGS'].append('-g')
 env['CPPPATH'].append(env['OPENCVBUILDER_INCLUDE_DIR'])
 
 # Define a variant dir
