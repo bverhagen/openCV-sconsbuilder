@@ -1,12 +1,12 @@
 #!/bin/sh
 
 function logValue {
-	echo "	<measurement name=\"$1\">$2</measurement>" >&$3
+	echo "	<measurement name=\"$1\" unit=\"$2\">$3</measurement>" >&$4
 }
 
 function parseAndLogValue {
-	value=$(cat $1 | grep "$2" | cut -d$3 -f$4)
-	logValue "$5" "$value" $6
+	value=$(cat $1 | grep "$2" | cut -d$3 -f$4 | sed 's/^ *//' | cut -d' ' -f1)
+	logValue "$5" 'seconds' "$value" $6
 }
 
 function beginMeasurement {
