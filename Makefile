@@ -1,3 +1,7 @@
+SCONS_ARGS=-C example --debug=time
+
+default: example-linux
+
 get3rdparty:
 	./getOpenCv.sh
 
@@ -5,7 +9,7 @@ example: get3rdparty
 	scons -C example --jobs 8 example
 
 example-linux: get3rdparty
-	scons -C example --jobs 8 target=linux example
+	scons $(SCONS_ARGS) --jobs 8 target=linux example
 
 example-linux-rebuild: clean example-linux
 
