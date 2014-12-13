@@ -42,13 +42,12 @@ class XMLWriter:
 class SconsTimeOutputReader:
     def __init__(self, inputFilePath):
         try:
-            self.fh_ = open(inputFilePath, 'r')
-            print("Interpreting {inputFilePath}...".format(inputFilePath = inputFilePath))
+            with open(inputFilePath, 'r') as self.fh_:
+                print("Interpreting {inputFilePath}...".format(inputFilePath = inputFilePath))
+                self.lines = self.fh_.readlines()
         except FileNotFoundError:
             print("Input file not found")
             raise
-    def __del__(self):
-        self.fh_.close()
     @staticmethod
     def getModule(path):
         pathList = path.split('/')
@@ -58,13 +57,13 @@ class SconsTimeOutputReader:
     @staticmethod
     def getTime(line):
         lineList = line.split(':')
-        return float(lineList[2].split(' ')[1])
+        for line in lineList:
+            if 'seconds' in line:
+                return float(line.split(' ')[1])
 
     def getModuleTimeLines(self):
-        content = self.fh_.readlines()
         result = dict()
-
-        for line in content:
+        for line in self.lines:
             pattern = re.search("Command execution time:.*opencv", line) 
             if pattern:
                 module = self.getModule(line)
@@ -74,10 +73,16 @@ class SconsTimeOutputReader:
                 else:
                     result[module] = time
         return result
-
+    def getTotalBuildTime(self):
+        for line in self.lines:
+            pattern = re.search("Total build time:", line)
+            if pattern:
+                return self.getTime(line)
 
 def extractBuildTimeInformation(inputFile, fh):
-    moduleList = inputFile.getModuleTimeLines();
+    totalBuildtime = inputFile.getTotalBuildTime()
+    fh.write('total-build-time', {'total-build-time' : totalBuildtime})
+    moduleList = inputFile.getModuleTimeLines()
     fh.write('modules', moduleList)
 
 def main():
