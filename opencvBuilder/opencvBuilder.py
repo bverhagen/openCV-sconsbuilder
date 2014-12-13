@@ -79,6 +79,7 @@ def build_opencv_generator(source, target, env, for_signature):
     lib = env_opencv.Library('{lib}'.format(lib = target[0]), sources)
     installed_lib = env_opencv.Install("{libs_dir}".format(libs_dir=env['OPENCVBUILDER_LIBS_DIR']), lib)
     env_opencv.Alias("buildAllLibs", installed_lib)
+    env_opencv.Alias("buildAllLibs{module}".format(module=module), installed_lib)
     return installed_lib
 
 def config_opencv_emitter(target, source, env):

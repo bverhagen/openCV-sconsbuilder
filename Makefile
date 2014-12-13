@@ -39,6 +39,8 @@ buildAllLibs: get3rdparty
 buildAllLibs-linux: get3rdparty
 	scons $(SCONS_ARGS) --jobs 8 target=linux buildAllLibs
 
+buildAllLibs-linux-rebuild: clean buildAllLibs-Linux
+
 buildAllLibs-macosx: get3rdparty
 	scons $(SCONS_ARGS) --jobs 8 target=macosx buildAllLibs
 
