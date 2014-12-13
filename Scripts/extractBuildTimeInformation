@@ -32,7 +32,7 @@ fi
 # Writing xml header
 echo '<?xml version="1.0" encoding="UTF-8"?>' >&3
 
-beginMeasurement 'Total build time' 3
+beginMeasurement 'Total-build-time' 3
 	parseAndLogValue $1 'Total build time' : 2 'Total-build-time' 3
 endMeasurement 3
 
