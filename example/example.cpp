@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
 	cv::imshow("You need vision", imFrame);
 	cv::waitKey(1000);
 
-  	const unsigned int videoId = 0U;
+/*   	const unsigned int videoId = 0U;
 	cv::VideoCapture videoCapture;
 	videoCapture.open(videoId);
 	if(! videoCapture.isOpened()) {
@@ -44,6 +44,6 @@ int main(int argc, char** argv) {
 		videoCapture.read(frame);
 		cv::imshow("Camera input", frame);
 		cv::waitKey(30);
-	}
+	}*/
 	return EXIT_SUCCESS;
 }

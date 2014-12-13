@@ -11,8 +11,8 @@ if env['BUILD_TARGET'] == 'linux':
 	'WITH_FFMPEG' : True,
 	'WITH_GTK' : True,
 	'WITH_JPEG' : True,
-	'WITH_LIBV4L' : True,
-	'WITH_V4L' : True
+	'WITH_LIBV4L' : False,
+	'WITH_V4L' : False
     }
     env['OPENCVBUILDER_INCLUDE_PATHS'] = [
 	'/usr/include',
