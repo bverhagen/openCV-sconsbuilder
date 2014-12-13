@@ -7,6 +7,8 @@ example: get3rdparty
 example-linux: get3rdparty
 	scons -C example --jobs 8 target=linux example
 
+example-linux-rebuild: clean example-linux
+
 example-linux-single-threaded: get3rdparty
 	scons -C example --jobs 1 target=linux example
 
@@ -18,6 +20,8 @@ buildAllLibsWithExample: get3rdparty
 
 buildAllLibsWithExample-linux: get3rdparty
 	scons -C example --jobs 8 target=linux buildAllLibsWithExample
+
+buildAllLibsWithExample-linux-rebuild: clean buildAllLibsWithExample-linux
 
 buildAllLibsWithExample-linux-single-threaded: get3rdparty
 	scons -C example --jobs 1 target=linux buildAllLibsWithExample
@@ -34,3 +38,7 @@ buildAllLibs-linux: get3rdparty
 buildAllLibs-macosx: get3rdparty
 	scons -C example --jobs 8 target=macosx buildAllLibs
 
+clean:
+	rm -rf opencv
+	rm -f *.a
+	rm -rf example/build
