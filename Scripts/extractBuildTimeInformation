@@ -1,7 +1,7 @@
 #!/bin/sh
 
 function logValue {
-	echo "<system-out>&lt;measurement&gt;&lt;name&gt$1&lt;/name&gt;&lt;value&gt;$2&lt;/value&gt;&lt;/measurement&gt;</system-out>" >&$3
+	echo "	<measurement name=$1 value=$2 />" >&$3
 }
 
 function parseAndLogValue {
@@ -9,12 +9,12 @@ function parseAndLogValue {
 	logValue "$5" "$value" $6
 }
 
-function beginTestSuite {
-	echo "<testsuite  name=\"$1\" >" >&$2
+function beginMeasurement {
+	echo "<measurements  name=\"$1\" >" >&$2
 }
 
-function endTestSuite {
-	echo "</testsuite>" >&$1
+function endMeasurement {
+	echo "</measurements>" >&$1
 }
 
 # Check if file exists
@@ -32,11 +32,8 @@ fi
 # Writing xml header
 echo '<?xml version="1.0" encoding="UTF-8"?>' >&3
 
-# Writing test suite collection header
-echo '<testsuites name="BuildAnalysis">' >&3
-
-beginTestSuite 'Total build time' 3
+beginMeasurement 'Total build time' 3
 	parseAndLogValue $1 'Total build time' : 2 'Total build time' 3
-endTestSuite 3
+endMeasurement 3
 
 exit 0
