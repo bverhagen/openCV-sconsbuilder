@@ -1,7 +1,7 @@
 #!/bin/sh
 
 function logValue {
-	echo "	<measurement name=\"$1\" unit=\"$2\">$3</measurement>" >&$4
+	echo "	<measurement name=\"$1\" unit=\"$2\" value=\"$3\"/>" >&$4
 }
 
 function parseAndLogValue {
