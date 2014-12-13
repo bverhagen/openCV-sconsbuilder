@@ -1,4 +1,4 @@
-SCONS_ARGS=$(SCONS_ARGS) --debug=time
+SCONS_ARGS=-C example --debug=time
 
 default: example-linux
 

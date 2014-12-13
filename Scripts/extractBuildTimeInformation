@@ -1,18 +1,42 @@
 #!/bin/sh
 
 function logValue {
-	echo "<measurement><name>$1</name><value>$2</value></measurement>"
+	echo "<system-out>&lt;measurement&gt;&lt;name&gt$1&lt;/name&gt;&lt;value&gt;$2&lt;/value&gt;&lt;/measurement&gt;</system-out>" >&$3
 }
 
 function parseAndLogValue {
 	value=$(cat $1 | grep "$2" | cut -d$3 -f$4)
-	logValue "$5" "$value"
+	logValue "$5" "$value" $6
+}
+
+function beginTestSuite {
+	echo "<testsuite  name=\"$1\" >" >&$2
+}
+
+function endTestSuite {
+	echo "</testsuite>" >&$1
 }
 
 # Check if file exists
 [ ! -f $1 ] && echo "Error: file '$1' not found" && exit 1
 echo "Interpreting file '$1'..."
 
-parseAndLogValue $1 'Total build time' : 2 'Total build time'
+# Check if target file is set
+if [ -z $2 ]; then
+	echo 'No target style set, using stdout'
+	exec 3>&1
+else
+	exec 3> $2
+fi	
+
+# Writing xml header
+echo '<?xml version="1.0" encoding="UTF-8"?>' >&3
+
+# Writing test suite collection header
+echo '<testsuites name="BuildAnalysis">' >&3
+
+beginTestSuite 'Total build time' 3
+	parseAndLogValue $1 'Total build time' : 2 'Total build time' 3
+endTestSuite 3
 
 exit 0
