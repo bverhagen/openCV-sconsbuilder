@@ -1,7 +1,7 @@
 #!/bin/sh
 
 function logValue {
-	echo "	<measurement name=$1 value=$2 />" >&$3
+	echo "	<measurement name=\"$1\">$2</measurement>" >&$3
 }
 
 function parseAndLogValue {
@@ -10,7 +10,7 @@ function parseAndLogValue {
 }
 
 function beginMeasurement {
-	echo "<measurements  name=\"$1\" >" >&$2
+	echo "<measurements  id=\"$1\" >" >&$2
 }
 
 function endMeasurement {
@@ -33,7 +33,7 @@ fi
 echo '<?xml version="1.0" encoding="UTF-8"?>' >&3
 
 beginMeasurement 'Total build time' 3
-	parseAndLogValue $1 'Total build time' : 2 'Total build time' 3
+	parseAndLogValue $1 'Total build time' : 2 'Total-build-time' 3
 endMeasurement 3
 
 exit 0
