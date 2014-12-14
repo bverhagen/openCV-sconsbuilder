@@ -4,7 +4,7 @@ libs = [
 	'opencv_highgui',
 #	'opencv_videoio',
 	'opencv_imgcodecs',
-#	'opencv_imgproc',
+	'opencv_imgproc',
 	'opencv_core',
 ]
 libs.extend(env['OPENCVBUILDER_ADDITIONAL_LIBRARIES'])

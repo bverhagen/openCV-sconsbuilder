@@ -387,6 +387,8 @@ class modulesToFilterFunctions(object):
         additionalIncludes = list()
         additionalLibs = list()
 	sources = modulesToFilterFunctions.optionToSources('WITH_IOS', sources, '{module}/src/ios_conversions.mm'.format(module = modulePath))
+        if ccmake['BUILD_JPEG']:
+            additionalIncludes.append('{modulePath}/../../3rdparty/libjpeg'.format(modulePath = modulePath))
         return sources,additionalIncludes,additionalLibs
 
 def findGstreamer():

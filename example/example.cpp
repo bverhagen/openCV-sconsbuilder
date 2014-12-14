@@ -18,7 +18,7 @@
 #include "opencv2/highgui/highgui.hpp"
 
 int main(int argc, char** argv) {
-	std::string filename = "/home/cv/workspace/openCV-sconsbuilder/fixJpegLib/example/duomo.jpg";
+	std::string filename = "duomo.jpg";
 	cv::Mat imFrame = cv::imread(filename, cv::IMREAD_GRAYSCALE);
 
 	if(imFrame.rows == 0 || imFrame.cols == 0) {
