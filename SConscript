@@ -22,4 +22,4 @@ for entry in Glob('{path}/*'.format(path = env['OPENCVBUILDER_MODULE_DIR'])):
 		env.openclOpencv()
 		env.buildOpencv()
 
-env['LINKFLAGS'] = env['OPENCVBUILDER_ADDITIONAL_FLAGS']
+env['LINKFLAGS'].extend(env['OPENCVBUILDER_ADDITIONAL_FLAGS'])
