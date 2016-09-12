@@ -13,8 +13,8 @@ compiler:
     - gcc
 
 script: 
-    - scons -C examples example
-    - scons -C examples buildAllLibsWithExample
+    - scons -C example example
+    - scons -C example buildAllLibsWithExample
 
 # Require sudo for apt
 sudo: required
