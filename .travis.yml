@@ -1,9 +1,4 @@
 before_install:
-    #    - sudo apt-get -qq update
-    #    - sudo apt-get install -y cmake python3 valgrind
-# Use sed to replace the SSH URL with the public URL, then initialize submodules
-before_install:
-    - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
     - ./getOpenCv.sh
 
 addons:
@@ -20,11 +15,6 @@ compiler:
 script: 
     - scons -C examples example
     - scons -C examples buildAllLibsWithExample
-
-## Hacks to make Travis handle git submodules properly
-# Handle git submodules yourself
-git:
-    submodules: false
 
 # Require sudo for apt
 sudo: required
